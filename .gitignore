@@ -161,3 +161,76 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 output
+
+# Claude Code files - AI Assistant generated files
+CLAUDE.md
+.claude/
+claude_*
+*.claude
+*_claude_*
+.claude_*
+claude-*
+*-claude-*
+*claude*
+Claude*
+
+# Large files and datasets
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.7z
+*.rar
+*.bin
+*.exe
+*.dmg
+*.pkg
+*.deb
+*.rpm
+
+# Data files
+data/
+dataset/
+datasets/
+checkpoints/
+models/
+weights/
+*.pth
+*.pt
+*.ckpt
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+
+# Evaluation outputs
+eval/
+output/
+outputs/
+results/
+logs/
+
+# Media files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wmv
+*.flv
+*.webm
+*.m4v
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.aac
+
+# Large image files
+*.tiff
+*.tif
+*.bmp
+*.raw
+*.dng
+*.cr2
+*.nef
+*.arw
