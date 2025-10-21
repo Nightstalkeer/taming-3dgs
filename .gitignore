@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# Text files (excluding important ones)
+*.txt
+!requirements.txt
+!README.txt
+
 # Distribution / packaging
 .Python
 build/

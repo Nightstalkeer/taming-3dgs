@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/.claude" />
+      <excludeFolder url="file://$MODULE_DIR$/data" />
+      <excludeFolder url="file://$MODULE_DIR$/eval" />
+      <excludeFolder url="file://$MODULE_DIR$/output" />
+      <excludeFolder url="file://$MODULE_DIR$/submodules/diff-gaussian-rasterization/build" />
+      <excludeFolder url="file://$MODULE_DIR$/submodules/diff-gaussian-rasterization/diff_gaussian_rasterization.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/submodules/fused-ssim/build" />
+      <excludeFolder url="file://$MODULE_DIR$/submodules/fused-ssim/fused_ssim.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/submodules/simple-knn/build" />
+      <excludeFolder url="file://$MODULE_DIR$/submodules/simple-knn/simple_knn.egg-info" />
+    </content>
     <orderEntry type="jdk" jdkName="$USER_HOME$/anaconda3" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
