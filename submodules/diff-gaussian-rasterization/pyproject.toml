@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "torch"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diff_gaussian_rasterization"
+version = "0.1.0"
+description = "Differentiable Gaussian Rasterization for 3D Gaussian Splatting"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "Non-commercial research license - see LICENSE.md"}
+dependencies = [
+    "torch>=1.12.0",
+]
+authors = [
+    {name = "GRAPHDECO research group", email = "george.drettakis@inria.fr"}
+]
+
+[tool.setuptools.packages.find]
+include = ["diff_gaussian_rasterization*"]

@@ -171,12 +171,17 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
                         camlist.append(my_viewpoint_stack.pop(loc))
                         edge_losses.append(edges_stack.pop(loc))
 
-                    gaussian_importance = compute_gaussian_score(scene, camlist, edge_losses, gaussians, pipe, bg, score_coefficients, opt)                    
-                    gaussians.densify_with_score(scores = gaussian_importance, 
-                                                max_screen_size = size_threshold, 
-                                                min_opacity = 0.005, 
-                                                extent = scene.cameras_extent, 
-                                                budget=counts_array[densify_iter_num+1], 
+                    gaussian_importance = compute_gaussian_score(scene, camlist, edge_losses, gaussians, pipe, bg, score_coefficients, opt)
+
+                    # FIX: Bounds check for counts_array to prevent IndexError
+                    # When at the last densification step, use the final target count
+                    budget_target = counts_array[min(densify_iter_num+1, len(counts_array)-1)]
+
+                    gaussians.densify_with_score(scores = gaussian_importance,
+                                                max_screen_size = size_threshold,
+                                                min_opacity = 0.005,
+                                                extent = scene.cameras_extent,
+                                                budget=budget_target,
                                                 radii=radii,
                                                 iter_num=densify_iter_num)
                     densify_iter_num += 1

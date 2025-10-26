@@ -1,4 +1,4 @@
-name: 3dgs_yml
+name: rtx5080_3dgs
 channels:
   - pytorch
   - nvidia
@@ -6,12 +6,13 @@ channels:
   - defaults
 dependencies:
   - cudatoolkit=11.8
-  - plyfile
   - python=3.10
   - pip
-  - pytorch=1.12.1
-  - torchaudio=0.12.1
-  - torchvision=0.13.1
+  - pytorch::pytorch=2.1.0
+  - pytorch::torchvision=0.16.0
+  - pytorch::torchaudio=2.1.0
+  - numpy<2.0
+  - plyfile
   - tqdm
   - websockets
   - pip:

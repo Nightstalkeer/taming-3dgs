@@ -161,7 +161,38 @@ class GaussianModel:
 
         print("Number of points at initialisation : ", fused_point_cloud.shape[0])
 
-        dist2 = torch.clamp_min(distCUDA2(torch.from_numpy(np.asarray(pcd.points)).float().cuda()), 0.0000001)
+        # Memory-efficient k-NN computation with batching
+        try:
+            # Try full k-NN computation
+            dist2 = torch.clamp_min(distCUDA2(torch.from_numpy(np.asarray(pcd.points)).float().cuda()), 0.0000001)
+        except (RuntimeError, MemoryError) as e:
+            print(f"Full k-NN failed ({str(e)}), using batch processing...")
+            # Fallback: compute k-NN in batches
+            points_np = np.asarray(pcd.points)
+            num_points = len(points_np)
+            batch_size = min(50000, num_points)  # Process 50k points at a time
+            dist2_list = []
+
+            for i in range(0, num_points, batch_size):
+                end_idx = min(i + batch_size, num_points)
+                batch_points = torch.from_numpy(points_np[i:end_idx]).float().cuda()
+                try:
+                    batch_dist2 = distCUDA2(batch_points)
+                    dist2_list.append(batch_dist2.cpu())
+                    del batch_points, batch_dist2
+                except (RuntimeError, MemoryError):
+                    # Ultimate fallback: use fixed small scale
+                    print("Batch k-NN also failed, using fixed scale initialization")
+                    dist2 = torch.full((num_points,), 0.01, device="cuda")
+                    break
+                torch.cuda.empty_cache()
+
+            if len(dist2_list) > 0:
+                dist2 = torch.cat(dist2_list).cuda()
+                dist2 = torch.clamp_min(dist2, 0.0000001)
+                del dist2_list
+            torch.cuda.empty_cache()
+
         scales = torch.log(torch.sqrt(dist2))[...,None].repeat(1, 3)
         rots = torch.zeros((fused_point_cloud.shape[0], 4), device="cuda")
         rots[:, 0] = 1
@@ -503,7 +534,7 @@ class GaussianModel:
         self.densification_postfix(new_xyz, new_features_dc, new_features_rest, new_opacities, new_scaling, new_rotation, new_tmp_radii)
 
     def densify_with_score(self, scores, max_screen_size, min_opacity, extent, budget, radii, iter_num=None):
-        
+
         grad_vars = self.xyz_gradient_accum / self.denom
         grad_vars[grad_vars.isnan()] = 0.0
         self.tmp_radii = radii
@@ -519,11 +550,22 @@ class GaussianModel:
 
         curr_points = len(self.get_xyz)
         budget = min(budget, total_clones + total_splits + curr_points)
-        clone_budget = ((budget - curr_points) * total_clones) // (total_clones + total_splits)
-        split_budget = ((budget - curr_points) * total_splits) // (total_clones + total_splits)
 
-        self.densify_and_clone_taming(scores.clone(), clone_budget, all_clones)
-        self.densify_and_split_taming(scores.clone(), split_budget, all_splits)
+        # FIX: Ensure budgets are never negative when curr_points >= budget
+        # This prevents "cannot sample n_sample <= 0 samples" error
+        available_budget = max(0, budget - curr_points)
+        if total_clones + total_splits > 0:
+            clone_budget = (available_budget * total_clones) // (total_clones + total_splits)
+            split_budget = (available_budget * total_splits) // (total_clones + total_splits)
+        else:
+            clone_budget = 0
+            split_budget = 0
+
+        # Only perform densification if we have budget available
+        if clone_budget > 0:
+            self.densify_and_clone_taming(scores.clone(), clone_budget, all_clones)
+        if split_budget > 0:
+            self.densify_and_split_taming(scores.clone(), split_budget, all_splits)
 
         prune_mask = (self.get_opacity < min_opacity).squeeze()
         if max_screen_size:
